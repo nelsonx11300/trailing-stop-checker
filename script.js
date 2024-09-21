@@ -25,8 +25,9 @@ async function checkTrailingStop() {
     const orderType = document.getElementById("order_type").value.toLowerCase();
     const priceType = document.getElementById("price_type").value.toLowerCase();
 
-    const startTime = new Date(startTimeStr).getTime();
-    const endTime = new Date(endTimeStr).getTime();
+    // Convert input times to milliseconds since epoch in UTC
+    const startTime = Date.parse(startTimeStr + 'Z');
+    const endTime = Date.parse(endTimeStr + 'Z');
 
     try {
         const klines = await fetchKlines(symbol, "1m", startTime, endTime, 1500, priceType);
@@ -38,8 +39,8 @@ async function checkTrailingStop() {
         const lowestTime = times[prices.indexOf(lowestPrice)];
         const highestTime = times[prices.indexOf(highestPrice)];
 
-        let resultText = `Lowest Price: ${lowestPrice} at ${lowestTime}<br>`;
-        resultText += `Highest Price: ${highestPrice} at ${highestTime}<br>`;
+        let resultText = `Lowest Price: ${lowestPrice} at ${lowestTime.toISOString()}<br>`;
+        resultText += `Highest Price: ${highestPrice} at ${highestTime.toISOString()}<br>`;
 
         let isActivated = false;
         if (orderType === "buy") {
@@ -60,6 +61,21 @@ async function checkTrailingStop() {
 
         resultText += isActivated ? "Trailing stop order is activated." : "Trailing stop order is not activated.";
         document.getElementById("result").innerHTML = resultText;
+
+        // Display Kline data
+        let klineTable = `<table><tr><th>Open Time (UTC)</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Volume</th></tr>`;
+        klines.forEach(kline => {
+            klineTable += `<tr>
+                <td>${new Date(kline[0]).toISOString()}</td>
+                <td>${kline[1]}</td>
+                <td>${kline[2]}</td>
+                <td>${kline[3]}</td>
+                <td>${kline[4]}</td>
+                <td>${kline[5]}</td>
+            </tr>`;
+        });
+        klineTable += `</table>`;
+        document.getElementById("kline-data").innerHTML = klineTable;
     } catch (error) {
         document.getElementById("result").innerHTML = `Error: ${error.message}`;
     }
