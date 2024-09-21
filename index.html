@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trailing Stop Order Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select {
+            margin-top: 5px;
+            padding: 5px;
+            width: 100%;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Trailing Stop Order Checker</h1>
+    <label for="symbol">Symbol (e.g., BTCUSDT):</label>
+    <input type="text" id="symbol" name="symbol">
+
+    <label for="start_time">Start Time (UTC) in format 'YYYY-MM-DD HH:MM:SS':</label>
+    <input type="text" id="start_time" name="start_time">
+
+    <label for="end_time">End Time (UTC) in format 'YYYY-MM-DD HH:MM:SS':</label>
+    <input type="text" id="end_time" name="end_time">
+
+    <label for="activation_price">Activation Price:</label>
+    <input type="number" id="activation_price" name="activation_price" step="0.01">
+
+    <label for="callback_rate">Callback Rate (e.g., 0.01 for 1%):</label>
+    <input type="number" id="callback_rate" name="callback_rate" step="0.01">
+
+    <label for="order_type">Order Type:</label>
+    <select id="order_type" name="order_type">
+        <option value="buy">Buy</option>
+        <option value="sell">Sell</option>
+    </select>
+
+    <label for="price_type">Trigger Condition:</label>
+    <select id="price_type" name="price_type">
+        <option value="last">Last Price</option>
+        <option value="mark">Mark Price</option>
+    </select>
+
+    <button onclick="checkTrailingStop()">Check Trailing Stop Order</button>
+
+    <div class="result" id="result"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
