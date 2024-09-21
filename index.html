@@ -33,6 +33,18 @@
         .result {
             margin-top: 20px;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -67,6 +79,7 @@
     <button onclick="checkTrailingStop()">Check Trailing Stop Order</button>
 
     <div class="result" id="result"></div>
+    <div class="kline-data" id="kline-data"></div>
 
     <script src="script.js"></script>
 </body>
