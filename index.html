@@ -8,79 +8,114 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
         }
-        label {
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        label, input, select, button {
             display: block;
-            margin-top: 10px;
+            width: 100%;
+            margin: 10px 0;
         }
         input, select {
-            margin-top: 5px;
-            padding: 5px;
-            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
         button {
-            margin-top: 20px;
             padding: 10px;
-            width: 100%;
-            background-color: #4CAF50;
-            color: white;
+            background-color: #007bff;
+            color: #fff;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
         }
-        .result {
+        #result, #prices {
             margin-top: 20px;
+            white-space: pre-wrap;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #klines {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid black;
         }
         th, td {
             padding: 8px;
             text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
-    <h1>Trailing Stop Order Checker</h1>
-    <label for="symbol">Symbol (e.g., BTCUSDT):</label>
-    <input type="text" id="symbol" name="symbol">
+    <div class="container">
+        <h1>Trailing Stop Order Checker</h1>
+        <label for="symbol">Symbol:</label>
+        <input type="text" id="symbol" value="BTCUSDT">
 
-    <label for="start_time">Start Time (UTC) in format 'YYYY-MM-DD HH:MM:SS':</label>
-    <input type="text" id="start_time" name="start_time">
+        <label for="start_time">Start Time (UTC):</label>
+        <input type="datetime-local" id="start_time">
 
-    <label for="end_time">End Time (UTC) in format 'YYYY-MM-DD HH:MM:SS':</label>
-    <input type="text" id="end_time" name="end_time">
+        <label for="end_time">End Time (UTC):</label>
+        <input type="datetime-local" id="end_time">
 
-    <label for="activation_price">Activation Price:</label>
-    <input type="number" id="activation_price" name="activation_price" step="0.01">
+        <label for="activation_price">Activation Price:</label>
+        <input type="number" id="activation_price" step="0.01">
 
-    <label for="callback_rate">Callback Rate (e.g., 0.01 for 1%):</label>
-    <input type="number" id="callback_rate" name="callback_rate" step="0.01">
+        <label for="callback_rate">Callback Rate:</label>
+        <input type="number" id="callback_rate" step="0.01">
 
-    <label for="order_type">Order Type:</label>
-    <select id="order_type" name="order_type">
-        <option value="buy">Buy</option>
-        <option value="sell">Sell</option>
-    </select>
+        <label for="order_type">Order Type:</label>
+        <select id="order_type">
+            <option value="buy">Buy</option>
+            <option value="sell">Sell</option>
+        </select>
 
-    <label for="price_type">Trigger Condition:</label>
-    <select id="price_type" name="price_type">
-        <option value="last">Last Price</option>
-        <option value="mark">Mark Price</option>
-    </select>
+        <label for="price_type">Price Type:</label>
+        <select id="price_type">
+            <option value="last">Last Price</option>
+            <option value="mark">Mark Price</option>
+        </select>
 
-    <button onclick="checkTrailingStop()">Check Trailing Stop Order</button>
+        <button onclick="checkTrailingStop()">Check Trailing Stop</button>
 
-    <div class="result" id="result"></div>
-    <div class="kline-data" id="kline-data"></div>
+        <p id="result"></p>
+        <div id="prices"></div>
+        <div id="klines"></div>
+    </div>
 
+    <!-- 引入 moment.js 和 moment-timezone.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
