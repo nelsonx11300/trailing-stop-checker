@@ -1,3 +1,7 @@
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("checkButton").addEventListener("click", checkTrailingStop);
+});
+
 async function fetchKlines(symbol, interval, startTime, endTime, limit = 1500, priceType = "last") {
     const baseUrl = "https://fapi.binance.com";
     const endpoint = priceType === "mark" ? "/fapi/v1/markPriceKlines" : "/fapi/v1/klines";
