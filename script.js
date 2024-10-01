@@ -13,7 +13,15 @@ async function fetchKlines(symbol, interval, startTime, endTime, limit = 1500, p
     if (!response.ok) {
         throw new Error(`Error fetching klines: ${response.statusText}`);
     }
-    return response.json();
+    return await response.json();
+}
+
+function convertToUTC(dateTimeStr, timeZone) {
+    return moment.tz(dateTimeStr, timeZone).utc().valueOf();
+}
+
+function formatToUTC(dateTime, timeZone) {
+    return moment.tz(dateTime, timeZone).format('YYYY-MM-DD HH:mm:ss [UTC]');
 }
 
 async function checkTrailingStop() {
@@ -25,22 +33,43 @@ async function checkTrailingStop() {
     const orderType = document.getElementById("order_type").value.toLowerCase();
     const priceType = document.getElementById("price_type").value.toLowerCase();
 
-    // Convert input times to milliseconds since epoch in UTC
-    const startTime = Date.parse(startTimeStr + 'Z');
-    const endTime = Date.parse(endTimeStr + 'Z');
+    // 固定时区为 UTC
+    const timeZone = "UTC";
+
+    // Convert input times to milliseconds since epoch (UTC)
+    const startTime = convertToUTC(startTimeStr, timeZone);
+    const endTime = convertToUTC(endTimeStr, timeZone);
+
+    // Debugging prints
+    console.log(`Symbol: ${symbol}`);
+    console.log(`Start Time: ${startTimeStr}`);
+    console.log(`End Time: ${endTimeStr}`);
+    console.log(`Activation Price: ${activationPrice}`);
+    console.log(`Callback Rate: ${callbackRate}`);
+    console.log(`Order Type: ${orderType}`);
+    console.log(`Price Type: ${priceType}`);
+    console.log(`Start Time (ms): ${startTime}`);
+    console.log(`End Time (ms): ${endTime}`);
 
     try {
         const klines = await fetchKlines(symbol, "1m", startTime, endTime, 1500, priceType);
         const prices = klines.map(kline => parseFloat(kline[4])); // Closing prices
-        const times = klines.map(kline => new Date(kline[0]));
+        const highPrices = klines.map(kline => parseFloat(kline[2])); // High prices
+        const lowPrices = klines.map(kline => parseFloat(kline[3])); // Low prices
+        const times = klines.map(kline => new Date(kline[0])); // Open times in UTC
 
-        const lowestPrice = Math.min(...prices);
-        const highestPrice = Math.max(...prices);
-        const lowestTime = times[prices.indexOf(lowestPrice)];
-        const highestTime = times[prices.indexOf(highestPrice)];
+        const lowestPrice = Math.min(...lowPrices);
+        const highestPrice = Math.max(...highPrices);
+        const lowestTime = times[lowPrices.indexOf(lowestPrice)];
+        const highestTime = times[highPrices.indexOf(highestPrice)];
 
-        let resultText = `Lowest Price: ${lowestPrice} at ${lowestTime.toISOString()}<br>`;
-        resultText += `Highest Price: ${highestPrice} at ${highestTime.toISOString()}<br>`;
+        const formattedLowestTime = formatToUTC(lowestTime, timeZone);
+        const formattedHighestTime = formatToUTC(highestTime, timeZone);
+
+        console.log(`Lowest Price: ${lowestPrice} at ${formattedLowestTime}`);
+        console.log(`Highest Price: ${highestPrice} at ${formattedHighestTime}`);
+
+        document.getElementById("prices").textContent = `Lowest Price: ${lowestPrice} at ${formattedLowestTime}\nHighest Price: ${highestPrice} at ${formattedHighestTime}`;
 
         let isActivated = false;
         if (orderType === "buy") {
@@ -59,24 +88,51 @@ async function checkTrailingStop() {
             }
         }
 
-        resultText += isActivated ? "Trailing stop order is activated." : "Trailing stop order is not activated.";
-        document.getElementById("result").innerHTML = resultText;
+        document.getElementById("result").textContent = isActivated
+            ? "Trailing stop order is activated."
+            : "Trailing stop order is not activated.";
 
-        // Display Kline data
-        let klineTable = `<table><tr><th>Open Time (UTC)</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Volume</th></tr>`;
+        // Format and print klines data as table
+        let tableContent = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Open Time</th>
+                        <th>Open</th>
+                        <th>High</th>
+                        <th>Low</th>
+                        <th>Close</th>
+                        <th>Close Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
         klines.forEach(kline => {
-            klineTable += `<tr>
-                <td>${new Date(kline[0]).toISOString()}</td>
-                <td>${kline[1]}</td>
-                <td>${kline[2]}</td>
-                <td>${kline[3]}</td>
-                <td>${kline[4]}</td>
-                <td>${kline[5]}</td>
-            </tr>`;
+            const openTime = formatToUTC(kline[0], timeZone);
+            const open = kline[1];
+            const high = kline[2];
+            const low = kline[3];
+            const close = kline[4];
+            const closeTime = formatToUTC(kline[6], timeZone);
+            tableContent += `
+                <tr>
+                    <td>${openTime}</td>
+                    <td>${open}</td>
+                    <td>${high}</td>
+                    <td>${low}</td>
+                    <td>${close}</td>
+                    <td>${closeTime}</td>
+                </tr>
+            `;
         });
-        klineTable += `</table>`;
-        document.getElementById("kline-data").innerHTML = klineTable;
+        tableContent += `
+                </tbody>
+            </table>
+        `;
+
+        document.getElementById("klines").innerHTML = tableContent;
     } catch (error) {
-        document.getElementById("result").innerHTML = `Error: ${error.message}`;
+        console.error(error);
+        document.getElementById("result").textContent = `Error: ${error.message}`;
     }
 }
